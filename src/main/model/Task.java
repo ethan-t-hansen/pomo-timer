@@ -3,23 +3,17 @@ package model;
 public class Task {
 
     String title;
-    boolean complete;
 
     // REQUIRES: title has non zero length
-    // EFFECTS: creates a task with a given title and a status of false
+    // EFFECTS: creates a task with a given title
     public Task(String title) {
         this.title = title;
-        this.complete = false;
     }
 
     // getters
 
     public String getTitle() {
         return title;
-    }
-
-    public Boolean isComplete() {
-        return complete;
     }
 
     // setters

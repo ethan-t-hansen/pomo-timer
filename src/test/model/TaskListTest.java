@@ -48,11 +48,10 @@ class TaskListTest {
         testTaskList.addTask(task4);
         testTaskList.addTask(task5);
         testTaskList.removeTask(1);
-        TaskList dummy = new TaskList();
-        dummy.addTask(task3);
-        dummy.addTask(task5);
         assertFalse(testTaskList.getTaskList().contains(task4));
-        assertEquals(dummy.getTaskList(),testTaskList.getTaskList());
+        assertTrue(testTaskList.getTaskList().contains(task3));
+        testTaskList.removeTask(0);
+        assertFalse(testTaskList.getTaskList().contains(task3));
     }
 
     @Test

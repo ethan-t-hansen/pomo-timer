@@ -17,7 +17,6 @@ public class TaskTest {
     @Test
     void testConstructor() {
         assertEquals("Test", testTask.getTitle());
-        assertFalse(testTask.isComplete());
     }
 
     @Test
@@ -26,6 +25,8 @@ public class TaskTest {
         assertEquals(testTask.getTitle(), "Do the laundry");
     }
 
-
-
+    @Test
+    void testGetTitle() {
+        assertEquals(testTask.getTitle(), "Test");
+    }
 }

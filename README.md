@@ -24,7 +24,7 @@ ___
 - As a user, I want to be able to *start*, *pause*, and *reset* my timers
 - As a user, I want to be able to *add* and *remove* task items in the list
 - As a user, I want to be able to *mark* tasks as complete and *move* them to a separate list
-- As a user, I want to be able to *increase* or *decrease*  the duration of the study timer and the break timer
+- As a user, I want to be able to set the duration of the study timer and the break timer
 - As a user, I want to be able to *switch* between study, short break, and long break timer views
 
 

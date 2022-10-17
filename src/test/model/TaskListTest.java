@@ -64,6 +64,16 @@ class TaskListTest {
     }
 
     @Test
+    void testClearTaskList() {
+        testTaskList.addTask(task1);
+        testTaskList.addTask(task2);
+        testTaskList.addTask(task3);
+        assertEquals(testTaskList.getTaskList().size(), 3);
+        testTaskList.clearTaskList();
+        assertEquals(testTaskList.getTaskList().size(), 0);
+    }
+
+    @Test
     void testEmptyStatement() {
         assertEquals(testTaskList.emptyStatement(), "You have no tasks left.");
     }
@@ -72,5 +82,7 @@ class TaskListTest {
     void testStatement() {
         assertEquals(testTaskList.statement(), "Current Tasks: ");
     }
+
+
 
 }

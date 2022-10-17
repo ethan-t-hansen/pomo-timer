@@ -41,4 +41,13 @@ public class TaskList {
         taskList.remove(index);
     }
 
+    // REQUIRES: completed list size > 0
+    // MODIFIES: this
+    // EFFECTS: removes all elements in the comp list
+    public void clearTaskList() {
+        for (int i = this.getTaskList().size() - 1; i >= 0; i--) {
+            this.removeTask(i);
+        }
+    }
+
 }

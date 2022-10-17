@@ -25,8 +25,4 @@ public class TaskTest {
         assertEquals(testTask.getTitle(), "Do the laundry");
     }
 
-    @Test
-    void testGetTitle() {
-        assertEquals(testTask.getTitle(), "Test");
-    }
 }

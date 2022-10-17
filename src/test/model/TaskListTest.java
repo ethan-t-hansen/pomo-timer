@@ -31,15 +31,15 @@ class TaskListTest {
     void testAdd() {
         Task newTask = new Task("Do work");
         testTaskList.addTask(newTask);
-        assertEquals(testTaskList.getTaskList().get(0), newTask);
+        assertEquals(testTaskList.taskAt(0), newTask);
     }
 
     @Test
     void testAddTwoTasks() {
         testTaskList.addTask(task2);
         testTaskList.addTask(task1);
-        assertEquals(testTaskList.getTaskList().get(0), task2);
-        assertEquals(testTaskList.getTaskList().get(1), task1);
+        assertEquals(testTaskList.taskAt(0), task2);
+        assertEquals(testTaskList.taskAt(1), task1);
     }
 
     @Test
@@ -68,9 +68,9 @@ class TaskListTest {
         testTaskList.addTask(task1);
         testTaskList.addTask(task2);
         testTaskList.addTask(task3);
-        assertEquals(testTaskList.getTaskList().size(), 3);
+        assertEquals(testTaskList.length(), 3);
         testTaskList.clearTaskList();
-        assertEquals(testTaskList.getTaskList().size(), 0);
+        assertEquals(testTaskList.length(), 0);
     }
 
     @Test

@@ -10,12 +10,14 @@ import java.util.TimerTask;
 public class PomoApp {
 
     private Scanner input;
-    private TaskList tasks = new TaskList();
-    private TaskList completedTasks = new CompletedTaskList();
+    private TaskList tasks;
+    private TaskList completedTasks;
+    private Timer timer;
 
-    Timer timer = new Timer();
     int studyDur;
-    boolean isActive = false;
+    int lastDur;
+    boolean isActive;
+    boolean isPaused;
 
     public PomoApp() {
         runPomo();
@@ -36,18 +38,22 @@ public class PomoApp {
 
             if (command.equals("q")) {
                 keepGoing = false;
+                System.out.println("\nGoodbye!");
+                System.exit(0);
             } else {
                 processCommand(command);
             }
 
         }
-
-        System.out.println("\nTerminating...");
     }
 
     // MODIFIES: this
-    // EFFECTS: initializes scanner
+    // EFFECTS: initializes scanner, task lists, and variables
     private void inScanner() {
+        isActive = false;
+        isPaused = false;
+        tasks = new TaskList();
+        completedTasks = new CompletedTaskList();
         input = new Scanner(System.in);
         input.useDelimiter("\n");
     }
@@ -57,23 +63,47 @@ public class PomoApp {
     private void processCommand(String command) {
         if (command.equals("a")) {
             doAddTask();
-        } else if (command.equals("r")) {
+        } else if (command.equals("x")) {
             doRemoveTask();
         } else if (command.equals("v")) {
-            printTasks(tasks);
-            System.out.println();
-            printTasks(completedTasks);
-        } else if (command.equals("m")) {
+            printTaskSummary();
+        } else if (command.equals("c")) {
             completeTask();
         } else if (command.equals("t")) {
             if (!isActive) {
-                adjustSettings();
-                setTimer();
-                isActive = true;
+                makeNewTimer();
             } else {
                 System.out.println(displayTime(studyDur));
             }
+        } else if (command.equals("p")) {
+            pauseOrResume();
+        } else if (command.equals("r")) {
+            resetTimer();
+        } else {
+            System.out.println("Invalid command");
         }
+    }
+
+    // EFFECTS: displays menu of options to user
+    private void displayMenu() {
+
+        System.out.println("\nSelect from:");
+        System.out.println("\ta -> add a task");
+        System.out.println("\tx -> remove a task");
+        System.out.println("\tv -> view tasks");
+        System.out.println("\tc -> mark a task as complete");
+        if (isActive) {
+            System.out.println("\tt -> view time remaining on active timer");
+            if (isPaused) {
+                System.out.println("\tp -> resume timer");
+            } else {
+                System.out.println("\tp -> pause timer");
+            }
+            System.out.println("\tr -> reset timer");
+        } else {
+            System.out.println("\tt -> start a new timer");
+        }
+        System.out.println("\tq -> quit");
     }
 
     // MODIFIES: tasks
@@ -82,6 +112,7 @@ public class PomoApp {
         System.out.println("Please enter the title of your task:");
         Task newTask = new Task(input.next());
         tasks.addTask(newTask);
+        System.out.println("Succesfully added task with title: " + newTask.getTitle());
     }
 
     // MODIFIES: tasks
@@ -90,9 +121,9 @@ public class PomoApp {
     private void doRemoveTask() {
         System.out.println("Please enter list number of the task you'd like to remove");
         int userInput = input.nextInt();
-        if (userInput <= tasks.getTaskList().size() && userInput >= 1) {
+        if (userInput <= tasks.length() && userInput >= 1) {
             System.out.println("Successfully removed task with title:");
-            System.out.println("\"" + tasks.getTaskList().get(userInput - 1).getTitle() + "\"");
+            System.out.println("\"" + tasks.taskAt(userInput - 1).getTitle() + "\"");
             tasks.removeTask(userInput - 1);
         } else {
             System.out.println("The specified task doesn't exist!");
@@ -102,13 +133,14 @@ public class PomoApp {
     // MODIFIES: tasks, completedTasks
     // EFFECTS: removes a task from the tasks and adds it to completedTasks
     // REQUIRES: task list is not empty
-    private void completeTask() { // NOTE: some code duplication with doRemoveTask, can be improved
+    //      note: some code duplication with doRemoveTask, can be optimized
+    private void completeTask() {
         System.out.println("Please enter list number of the task you've completed");
         int userInput = input.nextInt();
-        if (userInput <= tasks.getTaskList().size() && userInput >= 1) {
+        if (userInput <= tasks.length() && userInput >= 1) {
             System.out.println("Successfully completed task with title:");
-            System.out.println("\"" + tasks.getTaskList().get(userInput - 1).getTitle() + "\"");
-            completedTasks.addTask(new Task(tasks.getTaskList().get(userInput - 1).getTitle()));
+            System.out.println("\"" + tasks.taskAt(userInput - 1).getTitle() + "\"");
+            completedTasks.addTask(new Task(tasks.taskAt(userInput - 1).getTitle()));
             tasks.removeTask(userInput - 1);
         } else {
             System.out.println("The specified task doesn't exist!");
@@ -129,6 +161,13 @@ public class PomoApp {
         }
     }
 
+    // EFFECTS: prints both current and completed tasks
+    private void printTaskSummary() {
+        printTasks(tasks);
+        System.out.println();
+        printTasks(completedTasks);
+    }
+
     // MODIFIES: studyDur
     // EFFECTS: sets a timer duration by converting user input to seconds
     private void adjustSettings() {
@@ -136,29 +175,60 @@ public class PomoApp {
         studyDur = input.nextInt() * 60;
     }
 
+    // MODIFIES: isActive
+    // EFFECTS: sequence of method calls to initialize a new timer
+    private void makeNewTimer() {
+        adjustSettings();
+        setTimer();
+        System.out.println("Timer started!");
+        isActive = true;
+    }
+
+    // MODIFIES: isPaused
+    // EFFECTS: either pauses or resumes a timer depending on the status of isPaused
+    private void pauseOrResume() {
+        if (!isPaused) {
+            isPaused = true;
+            System.out.println("Timer paused.");
+        } else {
+            setTimer();
+            isPaused = false;
+            System.out.println("Timer resumed.");
+        }
+    }
+
+    // MODIFIES: isPaused, isActive, studyDur
+    // EFFECTS: makes a timer inactive, resets isPaused, and sets the study dur to the last time set
+    private void resetTimer() {
+        isPaused = false;
+        isActive = false;
+        studyDur = lastDur;
+        System.out.println("Timer reset.");
+    }
+
     // MODIFIES: studyDur
     // EFFECTS: initializes a timer that counts down until studyDur hits 0
     public void setTimer() {
 
+        lastDur = studyDur;
         timer = new Timer();
 
         timer.scheduleAtFixedRate(new TimerTask() {
-
             public void run() {
-
                 studyDur--;
-
+                if (isPaused) {
+                    timer.cancel();
+                }
                 if (studyDur < 0) {
                     timer.cancel();
                     isActive = false;
                     System.out.println("Break time!");
                 }
-
             }
         }, 0, 1000);
     }
 
-    // EFFECTS: converts a given amount of time (in seconds) to a string format akin to a digital timer / clock
+    // EFFECTS: converts a given amount of time (in seconds) to a string format similar to a digital time display
     public String displayTime(int timeLeft) {
 
         String seconds = Integer.toString(timeLeft % 60);
@@ -177,27 +247,6 @@ public class PomoApp {
             hours = "0" + hours;
         }
         return "Time remaining: " + minutes + ":" + seconds;
-    }
-
-    // EFFECTS: displays menu of options to user
-    private void displayMenu() {
-
-        String timerMenu;
-
-        if (isActive) {
-            timerMenu = "view time remaining on active timer";
-        } else {
-            timerMenu = "start a new timer";
-        }
-
-        System.out.println("\nSelect from:");
-        System.out.println("\ta -> add a task");
-        System.out.println("\tr -> remove a task");
-        System.out.println("\tv -> view tasks");
-        System.out.println("\tm -> mark a task as complete");
-        System.out.println("\tt -> " + timerMenu);
-        System.out.println("\tq -> quit");
-
     }
 
 }

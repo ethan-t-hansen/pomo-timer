@@ -5,7 +5,7 @@ import java.util.List;
 
 public class TaskList {
 
-    private List<Task> taskList;
+    private final List<Task> taskList;
 
     // EFFECTS: creates a new empty task list
     public TaskList() {
@@ -18,8 +18,16 @@ public class TaskList {
         return taskList;
     }
 
+    public int length() {
+        return taskList.size();
+    }
+
+    public Task taskAt(int index) {
+        return taskList.get(index);
+    }
+
     public String emptyStatement() {
-        return "You have no tasks left.";
+        return "You have no current tasks.";
     }
 
     public String statement() {

@@ -72,6 +72,7 @@ class JsonWriterTest extends JsonTest {
         try {
             int studyTime = 30;
             JsonWriter writer = new JsonWriter("./data/testWriterInt.json");
+            assertEquals(writer.getDestination(), "./data/testWriterInt.json");
             writer.open();
             writer.write(studyTime);
             writer.close();

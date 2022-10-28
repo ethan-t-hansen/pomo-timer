@@ -1,6 +1,9 @@
 package model;
 
-public class Task {
+import org.json.JSONObject;
+import persistence.Writable;
+
+public class Task implements Writable {
 
     String title;
 
@@ -22,6 +25,13 @@ public class Task {
     // EFFECTS: changes a given task's title
     public void changeTitle(String newTitle) {
         title = newTitle;
+    }
+
+    @Override
+    public JSONObject toJson() {
+        JSONObject json = new JSONObject();
+        json.put("Title", title);
+        return json;
     }
 
 }

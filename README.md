@@ -26,5 +26,8 @@ ___
 - As a user, I want to be able to "complete" tasks and *move* them to a separate list
 - As a user, I want to be able to customize the duration of my timer
 - As a user, I want to be able to *switch* between study, short break, and long break timer views
+- As a user, I want to be able to *save my current tasks* to a file
+- As a user, I want to be able to *save my the tasks I've completed in this session* to a file
+- As a user, I want to be able to *save total time studying* to a file
 
 

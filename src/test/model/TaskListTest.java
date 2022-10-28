@@ -75,7 +75,7 @@ class TaskListTest {
 
     @Test
     void testEmptyStatement() {
-        assertEquals(testTaskList.emptyStatement(), "You have no tasks left.");
+        assertEquals(testTaskList.emptyStatement(), "You have no current tasks.");
     }
 
     @Test

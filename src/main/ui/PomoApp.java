@@ -1,7 +1,11 @@
 package ui;
 
 import model.*;
+import persistence.JsonReader;
+import persistence.JsonWriter;
 
+import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.util.Collections;
 import java.util.Scanner;
 import java.util.Timer;
@@ -9,17 +13,30 @@ import java.util.TimerTask;
 
 public class PomoApp {
 
+    private static final String TL_JSON_STORE = "./data/taskList.json";
+    private static final String CTL_JSON_STORE = "./data/completedTaskList.json";
+    private static final String ST_JSON_STORE = "./data/totalStudyTime.json";
     private Scanner input;
     private TaskList tasks;
     private TaskList completedTasks;
     private Timer timer;
+    private JsonWriter jsonTaskWriter;
+    private JsonReader jsonTaskReader;
+    private JsonWriter jsonCompTaskWriter;
+    private JsonReader jsonCompTaskReader;
+    private JsonWriter jsonTimeWriter;
+    private JsonReader jsonTimeReader;
 
+    int previousSessionTime;
+    int totalStudyTime;
     int studyDur;
     int lastDur;
     boolean isActive;
     boolean isPaused;
+    boolean saveMenu = false;
 
-    public PomoApp() {
+    public PomoApp() throws FileNotFoundException {
+        inJson();
         runPomo();
     }
 
@@ -32,7 +49,11 @@ public class PomoApp {
         inScanner();
 
         while (keepGoing) {
-            displayMenu();
+            if (!saveMenu) {
+                displayMenu();
+            } else {
+                displaySaveMenu();
+            }
             command = input.next();
             command = command.toLowerCase();
 
@@ -40,11 +61,23 @@ public class PomoApp {
                 keepGoing = false;
                 System.out.println("\nGoodbye!");
                 System.exit(0);
+            } else if (saveMenu) {
+                processSaves(command);
             } else {
                 processCommand(command);
             }
-
         }
+    }
+
+    // MODIFIES: this
+    // EFFECTS: initializes json writers and readers
+    public void inJson() {
+        jsonTaskWriter = new JsonWriter(TL_JSON_STORE);
+        jsonTaskReader = new JsonReader(TL_JSON_STORE);
+        jsonCompTaskWriter = new JsonWriter(CTL_JSON_STORE);
+        jsonCompTaskReader = new JsonReader(CTL_JSON_STORE);
+        jsonTimeWriter = new JsonWriter(ST_JSON_STORE);
+        jsonTimeReader = new JsonReader(ST_JSON_STORE);
     }
 
     // MODIFIES: this
@@ -58,35 +91,9 @@ public class PomoApp {
         input.useDelimiter("\n");
     }
 
-    // MODIFIES: this
-    // EFFECTS: processes user command
-    private void processCommand(String command) {
-        if (command.equals("a")) {
-            doAddTask();
-        } else if (command.equals("x")) {
-            doRemoveTask();
-        } else if (command.equals("v")) {
-            printTaskSummary();
-        } else if (command.equals("c")) {
-            completeTask();
-        } else if (command.equals("t")) {
-            if (!isActive) {
-                makeNewTimer();
-            } else {
-                System.out.println(displayTime(studyDur));
-            }
-        } else if (command.equals("p")) {
-            pauseOrResume();
-        } else if (command.equals("r")) {
-            resetTimer();
-        } else {
-            System.out.println("Invalid command");
-        }
-    }
 
     // EFFECTS: displays menu of options to user
     private void displayMenu() {
-
         System.out.println("\nSelect from:");
         System.out.println("\ta -> add a task");
         System.out.println("\tx -> remove a task");
@@ -103,7 +110,67 @@ public class PomoApp {
         } else {
             System.out.println("\tt -> start a new timer");
         }
+        System.out.println("\to -> saving / loading options");
         System.out.println("\tq -> quit");
+    }
+
+    // EFFECTS: displays menu of save / load options from file
+    public void displaySaveMenu() {
+        System.out.println("\nSelect from:");
+        System.out.println("\ts -> save tasks to file");
+        System.out.println("\tl -> load tasks from file");
+        System.out.println("\tsc -> save completed tasks to file");
+        System.out.println("\tlc -> load completed tasks from file");
+        System.out.println("\tst -> log study session time to file");
+        System.out.println("\tlt -> load previous session study time from file");
+        System.out.println("\tv -> view previous session study time");
+        System.out.println("\tb -> go back");
+    }
+
+    // MODIFIES: this
+    // EFFECTS: processes user command
+    private void processCommand(String command) {
+        if (command.equals("a")) {
+            doAddTask();
+        } else if (command.equals("x")) {
+            doRemoveTask();
+        } else if (command.equals("v")) {
+            printTaskSummary();
+        } else if (command.equals("c")) {
+            completeTask();
+        } else if (command.equals("t")) {
+            printOrMakeTimer();
+        } else if (command.equals("p")) {
+            pauseOrResume();
+        } else if (command.equals("r")) {
+            resetTimer();
+        } else if (command.equals("o")) {
+            saveMenu = true;
+        } else {
+            System.out.println("Invalid command");
+        }
+    }
+
+    // MODIFIES: this
+    // EFFECTS: processes user commands when in save menu
+    private void processSaves(String command) {
+        if (command.equals("s")) {
+            saveTaskList(tasks, jsonTaskWriter);
+        } else if (command.equals("l")) {
+            loadTaskList();
+        } else if (command.equals("sc")) {
+            saveTaskList(completedTasks, jsonCompTaskWriter);
+        } else if (command.equals("lc")) {
+            loadCompTaskList();
+        } else if (command.equals("st")) {
+            saveSessionStudyTime();
+        } else if (command.equals("lt")) {
+            loadStudySessionTime();
+        } else if (command.equals("v")) {
+            System.out.println("Previous session time: " + displayTime(previousSessionTime));
+        } else if (command.equals("b")) {
+            saveMenu = false;
+        }
     }
 
     // MODIFIES: tasks
@@ -147,6 +214,15 @@ public class PomoApp {
         }
     }
 
+    // EFFECTS: makes a new timer or prints out current time depending on status of isActive
+    private void printOrMakeTimer() {
+        if (!isActive) {
+            makeNewTimer();
+        } else {
+            System.out.println("Time remaining: " + displayTime(studyDur));
+        }
+    }
+
     // EFFECTS: prints out current task list
     private void printTasks(TaskList taskList) {
         if (taskList.getTaskList().equals(Collections.emptyList())) {
@@ -173,6 +249,7 @@ public class PomoApp {
     private void adjustSettings() {
         System.out.println("Set timer duration (in minutes): ");
         studyDur = input.nextInt() * 60;
+        totalStudyTime += studyDur;
     }
 
     // MODIFIES: isActive
@@ -202,6 +279,7 @@ public class PomoApp {
     private void resetTimer() {
         isPaused = false;
         isActive = false;
+        totalStudyTime -= studyDur;
         studyDur = lastDur;
         System.out.println("Timer reset.");
     }
@@ -229,7 +307,7 @@ public class PomoApp {
     }
 
     // EFFECTS: converts a given amount of time (in seconds) to a string format similar to a digital time display
-    public String displayTime(int timeLeft) {
+    public static String displayTime(int timeLeft) {
 
         String seconds = Integer.toString(timeLeft % 60);
         String minutes = Integer.toString((timeLeft % 3600) / 60);
@@ -246,7 +324,66 @@ public class PomoApp {
         if (hours.length() < 2) {
             hours = "0" + hours;
         }
-        return "Time remaining: " + minutes + ":" + seconds;
+        return minutes + ":" + seconds;
     }
+
+    // EFFECTS: saves the task list to file
+    private void saveTaskList(TaskList tl, JsonWriter jr) {
+        try {
+            jr.open();
+            jr.write(tl);
+            jr.close();
+            System.out.println("Saved tasks to " + jr.getDestination());
+        } catch (FileNotFoundException e) {
+            System.out.println("Unable to write to file: " + jr.getDestination());
+        }
+    }
+
+    // EFFECTS: saves the task list to file
+    private void saveSessionStudyTime() {
+        try {
+            jsonTimeWriter.open();
+            jsonTimeWriter.write(totalStudyTime);
+            jsonTimeWriter.close();
+            System.out.println("Logged session study time to file: " + ST_JSON_STORE);
+        } catch (FileNotFoundException e) {
+            System.out.println("Unable to write to file: " + ST_JSON_STORE);
+        }
+    }
+
+    // MODIFIES: this
+    // EFFECTS: loads task list from file
+    private void loadTaskList() {
+        try {
+            tasks = jsonTaskReader.read();
+            System.out.println("Loaded tasks from " + TL_JSON_STORE);
+        } catch (IOException e) {
+            System.out.println("Unable to read from file: " + TL_JSON_STORE);
+        }
+    }
+
+    // MODIFIES: this
+    // EFFECTS: loads task list from file
+    private void loadCompTaskList() {
+        try {
+            completedTasks = jsonCompTaskReader.read();
+            System.out.println("Loaded tasks from " + CTL_JSON_STORE);
+        } catch (IOException e) {
+            System.out.println("Unable to read from file: " + CTL_JSON_STORE);
+        }
+    }
+
+    // MODIFIES: this
+    // EFFECTS: loads task list from file
+    private void loadStudySessionTime() {
+        try {
+            previousSessionTime = jsonTimeReader.readInt();
+            System.out.println("Loaded previous session study time from " + CTL_JSON_STORE);
+        } catch (IOException e) {
+            System.out.println("Unable to read from file: " + CTL_JSON_STORE);
+        }
+    }
+
+
 
 }

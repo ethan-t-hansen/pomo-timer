@@ -45,7 +45,7 @@ public class JsonReader {
         return contentBuilder.toString();
     }
 
-    // EFFECTS: parses workroom from JSON object and returns it
+    // EFFECTS: parses task list from JSON object and returns it
     private TaskList parseTaskList(JSONObject jsonObject) {
         TaskList tl = new TaskList();
         addTasks(tl, jsonObject);
@@ -66,8 +66,8 @@ public class JsonReader {
         }
     }
 
-    // MODIFIES: wr
-    // EFFECTS: parses thingy from JSON object and adds it to workroom
+    // MODIFIES: tl
+    // EFFECTS: parses tasks from JSON object and adds it to task list
     private void addTask(TaskList tl, JSONObject jsonObject) {
         String title = jsonObject.getString("Title");
         Task task = new Task(title);

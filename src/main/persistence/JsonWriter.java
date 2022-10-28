@@ -33,12 +33,13 @@ public class JsonWriter {
     }
 
     // MODIFIES: this
-    // EFFECTS: writes JSON representation of task list to file
+    // EFFECTS: writes JSON representation of task list to file for integers
     public void write(int studyTime) {
         JSONObject json = intToJson(studyTime);
         saveToFile(json.toString(TAB));
     }
 
+    // EFFECTS: places a given integer into a new json object
     public JSONObject intToJson(int i) {
         JSONObject json = new JSONObject();
         json.put("Total Study Time", i);

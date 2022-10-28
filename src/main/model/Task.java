@@ -3,6 +3,8 @@ package model;
 import org.json.JSONObject;
 import persistence.Writable;
 
+/* Represents a task or to-do item with a given title */
+
 public class Task implements Writable {
 
     String title;

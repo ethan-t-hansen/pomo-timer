@@ -1,5 +1,7 @@
 package model;
 
+/* Represents a Task that has been completed */
+
 public class CompletedTaskList extends TaskList {
 
     public CompletedTaskList() {

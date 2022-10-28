@@ -11,6 +11,8 @@ import java.util.Scanner;
 import java.util.Timer;
 import java.util.TimerTask;
 
+/* The main application for the Pomodoro app */
+
 public class PomoApp {
 
     private static final String TL_JSON_STORE = "./data/taskList.json";
@@ -383,7 +385,5 @@ public class PomoApp {
             System.out.println("Unable to read from file: " + CTL_JSON_STORE);
         }
     }
-
-
 
 }

@@ -7,6 +7,8 @@ import persistence.Writable;
 import java.util.ArrayList;
 import java.util.List;
 
+/* Represents a list of Task objects */
+
 public class TaskList implements Writable {
 
     private final List<Task> taskList;

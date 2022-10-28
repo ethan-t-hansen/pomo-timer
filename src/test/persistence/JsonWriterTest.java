@@ -66,4 +66,23 @@ class JsonWriterTest extends JsonTest {
             fail("Exception should not have been thrown");
         }
     }
+
+    @Test
+    void testWriteInt() {
+        try {
+            int studyTime = 30;
+            JsonWriter writer = new JsonWriter("./data/testWriterInt.json");
+            writer.open();
+            writer.write(studyTime);
+            writer.close();
+
+            JsonReader reader = new JsonReader("./data/testWriterInt.json");
+            studyTime = reader.readInt();
+            assertEquals(studyTime, 30);
+
+        } catch (IOException e) {
+            fail("Exception should not have been thrown");
+        }
+    }
+
 }

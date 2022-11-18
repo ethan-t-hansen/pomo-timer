@@ -13,10 +13,19 @@ import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.net.MalformedURLException;
-import java.net.URL;
 import java.util.Timer;
 import java.util.TimerTask;
+
+/*
+SOURCES:
+    https://www.tutorialspoint.com/swingexamples/show_input_dialog_text.htm
+    https://stackoverflow.com/questions/2536873/how-can-i-set-size-of-a-button
+    https://stackoverflow.com/questions/16134549/how-to-make-a-splash-screen-for-gui
+    https://github.students.cs.ubc.ca/CPSC210/AlarmSystem/
+    https://github.students.cs.ubc.ca/CPSC210/JsonSerializationDemo
+*/
+
+/* The main graphical application for the Pomodoro app */
 
 public class PomoFrame extends JFrame {
 
@@ -53,6 +62,7 @@ public class PomoFrame extends JFrame {
     private JsonWriter jsonTimeWriter;
     private JsonReader jsonTimeReader;
 
+    // The constructor: initializes the primary panes, panels, and fields.
     public PomoFrame() throws FileNotFoundException {
 
         splashScreen();
@@ -85,6 +95,7 @@ public class PomoFrame extends JFrame {
         setVisible(true);
     }
 
+    // generates the splash screen for the application
     public void splashScreen() {
         JWindow window = new JWindow();
         ImageIcon loadingScreen = new ImageIcon("loading_screen.gif");
@@ -114,12 +125,14 @@ public class PomoFrame extends JFrame {
         timerPanel.setBounds(WIDTH - 320, 0, 300, 120);
     }
 
+    // Helper to change panel settings
     public void changePanelSettings() {
         actionPanel.pack();
         actionPanel.setVisible(true);
         timerPanel.setVisible(true);
     }
 
+    // Helper to initialize the task view
     private void taskViewSettings() {
         DefaultListModel<String> myTasks = new DefaultListModel<>();
         myTasks.addElement("Current Tasks: ");
@@ -133,6 +146,7 @@ public class PomoFrame extends JFrame {
         taskView.add(new JButton(new ReturnToDesktopAction()));
     }
 
+    // Helper to initialize the completed task view
     private void compTaskViewSettings() {
         DefaultListModel<String> myTasks = new DefaultListModel<>();
         myTasks.addElement("Completed Tasks: ");
@@ -146,7 +160,7 @@ public class PomoFrame extends JFrame {
         compTaskView.add(new JButton(new ReturnToDesktopAction()));
     }
 
-    //Adds menu bar.
+    //Adds menu bar
     private void addMenu() {
         menuBar = new JMenuBar();
         JMenu fileMenu = new JMenu("File");
@@ -164,6 +178,7 @@ public class PomoFrame extends JFrame {
         setJMenuBar(menuBar);
     }
 
+    // Helper to add more to the menus
     private void addViewTaskTimerMenus() {
         JMenu viewMenu = new JMenu("View");
         viewMenu.setMnemonic('V');
@@ -184,6 +199,8 @@ public class PomoFrame extends JFrame {
                 KeyStroke.getKeyStroke("control T"));
         addMenuItem(systemMenu, new PauseTimerAction(),
                 KeyStroke.getKeyStroke("control P"));
+        addMenuItem(systemMenu, new ResetTimerAction(),
+                KeyStroke.getKeyStroke("control R"));
         menuBar.add(systemMenu);
     }
 
@@ -210,16 +227,18 @@ public class PomoFrame extends JFrame {
 
     // Add panel of buttons to perform program functions
     private void addButtonPanel() {
-        buttonPanel = new JPanel(new GridLayout(5, 1));
+        buttonPanel = new JPanel(new GridLayout(6, 1));
         buttonPanel.add(new JButton(new AddTaskAction()));
         buttonPanel.add(new JButton(new RemoveTaskAction()));
         buttonPanel.add(new JButton(new CompleteTaskAction()));
         buttonPanel.add(new JButton(new StartTimerAction()));
         buttonPanel.add(new JButton(new PauseTimerAction()));
+        buttonPanel.add(new JButton(new ResetTimerAction()));
 
         actionPanel.add(buttonPanel, BorderLayout.WEST);
     }
 
+    // Represents action to be taken when user wants to add a new task
     public class AddTaskAction extends AbstractAction {
 
         AddTaskAction() {
@@ -241,6 +260,8 @@ public class PomoFrame extends JFrame {
         }
     }
 
+
+    // Represents action to be taken when user wants to remove a task
     public class RemoveTaskAction extends AbstractAction {
 
         RemoveTaskAction() {
@@ -272,6 +293,7 @@ public class PomoFrame extends JFrame {
         }
     }
 
+    // Represents action to be taken when user wants to complete a task
     public class CompleteTaskAction extends AbstractAction {
 
         CompleteTaskAction() {
@@ -304,6 +326,7 @@ public class PomoFrame extends JFrame {
         }
     }
 
+    // Represents action to be taken when user wants to start a timer
     public class StartTimerAction extends AbstractAction {
 
         StartTimerAction() {
@@ -335,6 +358,7 @@ public class PomoFrame extends JFrame {
         }
     }
 
+    // Represents action to be taken when user wants to pause the timer
     public class PauseTimerAction extends AbstractAction {
 
         PauseTimerAction() {
@@ -354,6 +378,29 @@ public class PomoFrame extends JFrame {
         }
     }
 
+    // Represents action to be taken when user wants to reset the timer
+    public class ResetTimerAction extends AbstractAction {
+
+        ResetTimerAction() {
+            super("Reset Timer");
+        }
+
+        @Override
+        public void actionPerformed(ActionEvent e) {
+            if (!isActive) {
+                JOptionPane.showMessageDialog(null, "There is no active timer.",
+                        "Error", JOptionPane.ERROR_MESSAGE);
+            }
+            isPaused = false;
+            isActive = false;
+            totalStudyTime -= studyDur;
+            studyDur = 0;
+            revalidate();
+            repaint();
+        }
+    }
+
+    // Represents action to be taken when user wants to view their tasks
     public class ViewTasksAction extends AbstractAction {
         ViewTasksAction() {
             super("View Tasks");
@@ -361,36 +408,14 @@ public class PomoFrame extends JFrame {
 
         @Override
         public void actionPerformed(ActionEvent e) {
-
             taskViewSettings();
             setContentPane(taskView);
             revalidate();
             repaint();
-
-//            DefaultListModel<String> myTasks = new DefaultListModel<>();
-//            myTasks.addElement("Current Tasks: ");
-//            for (int i = 0; i < tasks.length(); i++) {
-//                myTasks.addElement(tasks.getTaskList().get(i).getTitle());
-//            }
-//            JList currTaskList = new JList<String>(myTasks);
-//            DefaultListModel<String> myCompTasks = new DefaultListModel<>();
-//            myCompTasks.addElement("Completed Tasks: ");
-//            for (int i = 0; i < compTasks.length(); i++) {
-//                myCompTasks.addElement(compTasks.getTaskList().get(i).getTitle());
-//            }
-//            JList compTaskList = new JList<String>(myCompTasks);
-//
-//            currTaskList.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
-//            compTaskList.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
-//
-//            JScrollPane currTLPane = new JScrollPane(currTaskList);
-//            JScrollPane compTLPane = new JScrollPane(compTaskList);
-//
-//            taskView.add(currTLPane);
-//            taskView.add(compTLPane);
         }
     }
 
+    // Represents action to be taken when user wants to view their completed tasks
     public class ViewCompTasksAction extends AbstractAction {
         ViewCompTasksAction() {
             super("View Completed Tasks");
@@ -406,6 +431,7 @@ public class PomoFrame extends JFrame {
         }
     }
 
+    // Represents action to be taken when user wants to return to the main interface
     public class ReturnToDesktopAction extends AbstractAction {
         ReturnToDesktopAction() {
             super("Return to Home Screen");
@@ -417,6 +443,7 @@ public class PomoFrame extends JFrame {
         }
     }
 
+    // Represents action to be taken when user wants to save tasks to file
     public class SaveTasksAction extends AbstractAction {
 
         SaveTasksAction() {
@@ -429,6 +456,7 @@ public class PomoFrame extends JFrame {
         }
     }
 
+    // Represents action to be taken when user wants to load their tasks
     public class LoadTasksAction extends AbstractAction {
 
         LoadTasksAction() {
@@ -441,6 +469,7 @@ public class PomoFrame extends JFrame {
         }
     }
 
+    // Represents action to be taken when user wants to save their completed tasks
     public class SaveCompTasksAction extends AbstractAction {
 
         SaveCompTasksAction() {
@@ -453,6 +482,7 @@ public class PomoFrame extends JFrame {
         }
     }
 
+    // Represents action to be taken when user wants to load their completed tasks
     public class LoadCompTasksAction extends AbstractAction {
 
         LoadCompTasksAction() {
@@ -465,6 +495,7 @@ public class PomoFrame extends JFrame {
         }
     }
 
+    // Represents action to be taken when user wants to log total time studied
     public class SaveSessionStudyTime extends AbstractAction {
 
         SaveSessionStudyTime() {
@@ -477,6 +508,7 @@ public class PomoFrame extends JFrame {
         }
     }
 
+    // Represents action to be taken when user wants to load previous session study time
     public class LoadSessionStudyTime extends AbstractAction {
 
         LoadSessionStudyTime() {
@@ -545,19 +577,14 @@ public class PomoFrame extends JFrame {
         return minutes + ":" + seconds;
     }
 
-    /**
-     * Helper to centre main application window on desktop
-     */
+    // centers main application window on desktop
     private void centreOnScreen() {
         int width = Toolkit.getDefaultToolkit().getScreenSize().width;
         int height = Toolkit.getDefaultToolkit().getScreenSize().height;
         setLocation((width - getWidth()) / 2, (height - getHeight()) / 2);
     }
 
-    /**
-     * Represents action to be taken when user clicks desktop
-     * to switch focus. (Needed for key handling.)
-     */
+    // Represents action to be taken when user clicks desktop
     private class DesktopFocusAction extends MouseAdapter {
         @Override
         public void mouseClicked(MouseEvent e) {

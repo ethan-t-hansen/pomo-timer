@@ -1,6 +1,8 @@
 package ui;
 
 import model.CompletedTaskList;
+import model.Event;
+import model.EventLog;
 import model.Task;
 import model.TaskList;
 import persistence.JsonReader;
@@ -8,9 +10,7 @@ import persistence.JsonWriter;
 
 import javax.swing.*;
 import java.awt.*;
-import java.awt.event.ActionEvent;
-import java.awt.event.MouseAdapter;
-import java.awt.event.MouseEvent;
+import java.awt.event.*;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.Timer;
@@ -21,6 +21,7 @@ SOURCES:
     https://www.tutorialspoint.com/swingexamples/show_input_dialog_text.htm
     https://stackoverflow.com/questions/2536873/how-can-i-set-size-of-a-button
     https://stackoverflow.com/questions/16134549/how-to-make-a-splash-screen-for-gui
+    https://stackoverflow.com/questions/10468149/jframe-on-close-operation
     https://github.students.cs.ubc.ca/CPSC210/AlarmSystem/
     https://github.students.cs.ubc.ca/CPSC210/JsonSerializationDemo
 */
@@ -90,9 +91,20 @@ public class PomoFrame extends JFrame {
         desktop.add(actionPanel);
         desktop.add(timerPanel);
 
-        setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
         centreOnScreen();
         setVisible(true);
+        addClosingOperation();
+
+    }
+
+    // set closing operation to print to console
+    public void addClosingOperation() {
+        this.addWindowListener(new WindowAdapter() {
+            public void windowClosing(WindowEvent e) {
+                printLog(EventLog.getInstance());
+                System.exit(0);
+            }
+        });
     }
 
     // generates the splash screen for the application
@@ -227,10 +239,11 @@ public class PomoFrame extends JFrame {
 
     // Add panel of buttons to perform program functions
     private void addButtonPanel() {
-        buttonPanel = new JPanel(new GridLayout(6, 1));
+        buttonPanel = new JPanel(new GridLayout(7, 1));
         buttonPanel.add(new JButton(new AddTaskAction()));
         buttonPanel.add(new JButton(new RemoveTaskAction()));
         buttonPanel.add(new JButton(new CompleteTaskAction()));
+        buttonPanel.add(new JButton(new ClearTaskListAction()));
         buttonPanel.add(new JButton(new StartTimerAction()));
         buttonPanel.add(new JButton(new PauseTimerAction()));
         buttonPanel.add(new JButton(new ResetTimerAction()));
@@ -297,7 +310,7 @@ public class PomoFrame extends JFrame {
     public class CompleteTaskAction extends AbstractAction {
 
         CompleteTaskAction() {
-            super("Mark a task as complete Task");
+            super("Mark a task as complete");
         }
 
         @Override
@@ -323,6 +336,21 @@ public class PomoFrame extends JFrame {
                 JOptionPane.showMessageDialog(null,
                         "No number was entered", "Error", JOptionPane.ERROR_MESSAGE);
             }
+        }
+    }
+
+    // Represents action to be taken when user wants to complete a task
+    public class ClearTaskListAction extends AbstractAction {
+
+        ClearTaskListAction() {
+            super("Clear task list");
+        }
+
+        @Override
+        public void actionPerformed(ActionEvent e) {
+            tasks.clearTaskList();
+            JOptionPane.showMessageDialog(null, "Cleared task list!",
+                    "Success", JOptionPane.INFORMATION_MESSAGE);
         }
     }
 
@@ -589,6 +617,13 @@ public class PomoFrame extends JFrame {
         @Override
         public void mouseClicked(MouseEvent e) {
             PomoFrame.this.requestFocusInWindow();
+        }
+    }
+
+    // print contents of the EventLog to the console
+    public void printLog(EventLog el) {
+        for (Event e : el) {
+            System.out.println(e);
         }
     }
 

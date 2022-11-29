@@ -46,13 +46,16 @@ public class TaskList implements Writable {
     // EFFECTS: adds a task to the task list
     public void addTask(Task task) {
         taskList.add(task);
+        EventLog.getInstance().logEvent(new Event("New task added: " + task.getTitle()));
     }
 
     // REQUIRES: Task list is not empty
     // MODIFIES: this
     // EFFECTS: removes the task from the specified index in a task list
     public void removeTask(int index) {
+        Task t = taskList.get(index);
         taskList.remove(index);
+        EventLog.getInstance().logEvent(new Event("Task removed: " + t.getTitle()));
     }
 
     // REQUIRES: completed list size > 0
@@ -62,6 +65,7 @@ public class TaskList implements Writable {
         for (int i = this.getTaskList().size() - 1; i >= 0; i--) {
             this.removeTask(i);
         }
+        EventLog.getInstance().logEvent(new Event("Task list cleared."));
     }
 
     @Override

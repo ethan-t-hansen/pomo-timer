@@ -71,7 +71,7 @@ public class JsonReader {
     private void addTask(TaskList tl, JSONObject jsonObject) {
         String title = jsonObject.getString("Title");
         Task task = new Task(title);
-        tl.addTask(task);
+        tl.addTask(task, 0);
     }
 
 }

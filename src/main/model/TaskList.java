@@ -44,18 +44,26 @@ public class TaskList implements Writable {
 
     // MODIFIES: this
     // EFFECTS: adds a task to the task list
-    public void addTask(Task task) {
+    //          type is a 0 or 1: indicates whether task is being added to a task list or completed
+    public void addTask(Task task, int type) {
         taskList.add(task);
-        EventLog.getInstance().logEvent(new Event("New task added: " + task.getTitle()));
+        if (type == 0) {
+            EventLog.getInstance().logEvent(new Event("New task added: " + task.getTitle()));
+        }
     }
 
     // REQUIRES: Task list is not empty
     // MODIFIES: this
     // EFFECTS: removes the task from the specified index in a task list
-    public void removeTask(int index) {
+    //          type is a 0 or 1: indicates whether task is being removed or completed
+    public void removeTask(int index, int type) {
         Task t = taskList.get(index);
+        String msg = "Task removed: ";
         taskList.remove(index);
-        EventLog.getInstance().logEvent(new Event("Task removed: " + t.getTitle()));
+        if (type == 1) {
+            msg = "Task completed: ";
+        }
+        EventLog.getInstance().logEvent(new Event(msg + t.getTitle()));
     }
 
     // REQUIRES: completed list size > 0
@@ -63,7 +71,7 @@ public class TaskList implements Writable {
     // EFFECTS: removes all elements in the comp list
     public void clearTaskList() {
         for (int i = this.getTaskList().size() - 1; i >= 0; i--) {
-            this.removeTask(i);
+            this.removeTask(i, 0);
         }
         EventLog.getInstance().logEvent(new Event("Task list cleared."));
     }

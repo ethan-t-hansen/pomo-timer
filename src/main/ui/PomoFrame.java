@@ -264,7 +264,7 @@ public class PomoFrame extends JFrame {
                     frame, "Add a Task", "",
                     JOptionPane.PLAIN_MESSAGE, null, null, "");
             if (result != null && result.length() > 0) {
-                tasks.addTask(new Task(result));
+                tasks.addTask(new Task(result), 0);
                 JOptionPane.showMessageDialog(null, "Successfully added task: " + result,
                         "Success", JOptionPane.INFORMATION_MESSAGE);
             } else {
@@ -289,7 +289,7 @@ public class PomoFrame extends JFrame {
             if (result != null && result.length() > 0) {
                 try {
                     String removed = tasks.taskAt(Integer.parseInt(result) - 1).getTitle();
-                    tasks.removeTask(Integer.parseInt(result) - 1);
+                    tasks.removeTask(Integer.parseInt(result) - 1, 0);
                     JOptionPane.showMessageDialog(null, "Successfully removed task: " + removed,
                             "Success", JOptionPane.INFORMATION_MESSAGE);
                 } catch (NumberFormatException numError) {
@@ -321,8 +321,8 @@ public class PomoFrame extends JFrame {
             if (result != null && result.length() > 0) {
                 try {
                     String removed = tasks.taskAt(Integer.parseInt(result) - 1).getTitle();
-                    compTasks.addTask(new Task(tasks.taskAt(Integer.parseInt(result) - 1).getTitle()));
-                    tasks.removeTask(Integer.parseInt(result) - 1);
+                    compTasks.addTask(new Task(tasks.taskAt(Integer.parseInt(result) - 1).getTitle()), 1);
+                    tasks.removeTask(Integer.parseInt(result) - 1, 1);
                     JOptionPane.showMessageDialog(null, "Successfully completed task: " + removed,
                             "Success", JOptionPane.INFORMATION_MESSAGE);
                 } catch (NumberFormatException numError) {

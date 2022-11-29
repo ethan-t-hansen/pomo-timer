@@ -48,8 +48,8 @@ class JsonWriterTest extends JsonTest {
     void testWriterGeneralWorkroom() {
         try {
             TaskList tl = new TaskList();
-            tl.addTask(new Task("Mop floor"));
-            tl.addTask(new Task("Wash dishes"));
+            tl.addTask(new Task("Mop floor"), 0);
+            tl.addTask(new Task("Wash dishes"), 0);
             JsonWriter writer = new JsonWriter("./data/testWriterGeneralTaskList.json");
             writer.open();
             writer.write(tl);

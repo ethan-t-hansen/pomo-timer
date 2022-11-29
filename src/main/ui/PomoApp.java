@@ -180,7 +180,7 @@ public class PomoApp {
     private void doAddTask() {
         System.out.println("Please enter the title of your task:");
         Task newTask = new Task(input.next());
-        tasks.addTask(newTask);
+        tasks.addTask(newTask, 0);
         System.out.println("Succesfully added task with title: " + newTask.getTitle());
     }
 
@@ -193,7 +193,7 @@ public class PomoApp {
         if (userInput <= tasks.length() && userInput >= 1) {
             System.out.println("Successfully removed task with title:");
             System.out.println("\"" + tasks.taskAt(userInput - 1).getTitle() + "\"");
-            tasks.removeTask(userInput - 1);
+            tasks.removeTask(userInput - 1, 0);
         } else {
             System.out.println("The specified task doesn't exist!");
         }
@@ -209,8 +209,8 @@ public class PomoApp {
         if (userInput <= tasks.length() && userInput >= 1) {
             System.out.println("Successfully completed task with title:");
             System.out.println("\"" + tasks.taskAt(userInput - 1).getTitle() + "\"");
-            completedTasks.addTask(new Task(tasks.taskAt(userInput - 1).getTitle()));
-            tasks.removeTask(userInput - 1);
+            completedTasks.addTask(new Task(tasks.taskAt(userInput - 1).getTitle()), 1);
+            tasks.removeTask(userInput - 1, 1);
         } else {
             System.out.println("The specified task doesn't exist!");
         }

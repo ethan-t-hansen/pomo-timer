@@ -58,12 +58,8 @@ public class TaskList implements Writable {
     //          type is a 0 or 1: indicates whether task is being removed or completed
     public void removeTask(int index, int type) {
         Task t = taskList.get(index);
-        String msg = "Task removed: ";
         taskList.remove(index);
-        if (type == 1) {
-            msg = "Task completed: ";
-        }
-        EventLog.getInstance().logEvent(new Event(msg + t.getTitle()));
+        EventLog.getInstance().logEvent(new Event((type == 1) ? "Task completed: " : "Task removed: " + t.getTitle()));
     }
 
     // REQUIRES: completed list size > 0

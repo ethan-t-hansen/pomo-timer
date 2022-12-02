@@ -30,4 +30,18 @@ ___
 - As a user, I want to be able to *save my the tasks I've completed in this session* to a file and *load them later*
 - As a user, I want to be able to *save total time studying* to a file and *view previous session times*
 
+### Phase 4: Task 2
+___
+
+Nothing is logged when the application first starts. This is because the user needs to do an action in order for any events
+to be logged.
+
+
+### Phase 4: Task 3
+___
+I think that the PomoFrame class is way too bulky and definitely could be split off into multiple classes to improve readability
+
+Besides this, nothing in particular stands off as improvable when looking at the UML diagram holistically. However, if I had the time,
+I would prefer to design my own Timer class that could override some implementations of the Java library.
+
 
